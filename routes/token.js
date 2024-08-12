@@ -7,7 +7,7 @@ router.post("/tokenIsValid", async (req, res) => {
     try {
         const token = req.header("auth-token")
         if (!token) {
-            return res.send("Invalid credentials.")
+            return res.send("No token.")
         }
         
         jwt.verify(token, process.env.JWT_SECRET, function(err, decode){
@@ -34,6 +34,41 @@ router.post("/tokenIsValid", async (req, res) => {
                         }
                     });
                 }
+            }
+        })
+    } catch {
+        res.status(500)
+    }
+})
+
+router.post("/adminTokenIsValid", async (req, res) => {
+    try {
+        const token = req.header("auth-token")
+        if (!token) {
+            return res.send("No token.")
+        }
+        
+        jwt.verify(token, process.env.JWT_SECRET, function(err, decode){
+            if (err) {
+                if (err.name==='TokenExpiredError') {
+                    return res.send("Session expired. Log in again.")
+                } else {
+                    return res.send("Invalid credentials.")
+                }
+            } else {
+                let query = `EXEC [HI_Plus].[NSP_Get_Employee_Details] '${decode.userName}'`;
+                new sql.Request().query(query, (err, sqlres) => {
+                    if (err) {
+                        res.status(500).json(err)
+                        console.error("Error executing query:", err);
+                    } else {
+                        if (sqlres.recordset.length<1) {
+                            return res.send("User data not found.")
+                        } else {
+                            return res.send(true)
+                        }
+                    }
+                });
             }
         })
     } catch {

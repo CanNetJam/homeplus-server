@@ -4,6 +4,7 @@ const serverConfig = {
     "server": process.env.NODE_ENV? process.env.DEV_SERVER : process.env.PROD_SERVER,
     "port": process.env.NODE_ENV? 1434 : null,
     "database": process.env.NODE_ENV? process.env.DEV_DATABASE : process.env.PROD_DATABASE,
+    requestTimeout: 600000,
     pool: {
         max: 50,
         min: 0,
